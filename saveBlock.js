@@ -1,34 +1,42 @@
 const getBlock = require('./getBlock')
 
 const mongoClient = require('mongodb').MongoClient
-const url = 'mongodb://127.0.0.1:27017' 
-const dbname = 'etherium'
+var url
+var dbname
 
-
-const save = (blockNumber, addToDatabase) => {
-
-    getBlock(blockNumber)
-        .then( addToDatabase )
+const set = (adresUrl, databaseName) => {
+    url = adresUrl
+    db = databaseName
 }
 
-const addToDatabase = (block => {
 
-    mongoClient.connect(url, {}, (err, client) => {
+const save = (blockNumber, addToDatasbase) => {
 
-        if(err) console.log('cannot connect to the database')
+    getBlock(blockNumber) // getting block by web3.eth.getBlock()
+        .then( addToDatabase ) // the next call to a method that writes this block
+}
+
+const addToDatabase = (block => { // writing block to the db
+
+    mongoClient.connect(url, {}, (err, client) => {  // creating a connection with the db
+
+        if(err) console.log('cannot connect to the database') // if error with connecting 
         
-        const db  =  client.db(dbname)
+        const db  =  client.db(dbname) // seting a name of the db (if not exist -> creating)
     
-        db.collection('blocks').insertOne( block, (error, result) => {
+        db.collection('blocks').insertOne( block, (error, result) => {  // calling a db's method that writes one record
 
-            if(error) console.log('block adding error') 
+            if(error => console.log) console.log('block adding error')  // if error with wrinting 
         
         }) 
 
-        db.collection('blocks').find({}) //all
-            .toArray((error, result) => console.log(result))
+        db.collection('blocks').find({}) // find records that ( without arguments -> all)
+            .toArray((error, result) => console.log(result)) // and show on the screen
     })
 })
 
+add = blockNr => save(blockNr, addToDatabase) // preparation to the module exports
 
-module.exports.add = blockNr => save(blockNr, addToDatabase)
+
+
+module.exports = { add, set }
